@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Algebra Quiz - Phase C (Grade 4 & 5)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- KaTeX for beautiful Math equations -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="initKaTeX()"></script>
+
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #FDFDF7;
+        }
+        .kids-heading {
+            font-family: 'Fredoka', sans-serif;
+        }
+        .bounce-hover {
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .bounce-hover:hover {
+            transform: scale(1.03);
+        }
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-[#FFFDF9] via-[#F0F9FF] to-[#FFF5F5] min-h-screen flex flex-col justify-between overflow-x-hidden select-none">
+
+    <!-- HEADER -->
+    <header class="bg-white/90 backdrop-blur-md border-b-4 border-[#4CC9F0] py-3.5 px-6 flex justify-between items-center sticky top-0 z-40 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-tr from-[#4CC9F0] to-[#4895EF] text-white p-2.5 rounded-2xl shadow-md">
+                <svg class="w-8 h-8 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 .364l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="kids-heading text-xl md:text-2xl font-bold text-[#2B2D42]">Algebra Quiz 15!</h1>
+                <p class="text-[10px] text-[#4895EF] font-black tracking-widest uppercase">Conceptual & Word Problem Evaluation</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-2 md:gap-3">
+            <!-- XP Badge -->
+            <div class="bg-[#EBF8FF] border-2 border-[#4895EF] rounded-full px-3 py-1.5 md:px-4 flex items-center gap-1.5 shadow-sm">
+                <span class="text-sm md:text-base">⭐</span>
+                <span id="xp-display" class="font-extrabold text-[#3F37C9] text-xs md:text-sm">0 XP</span>
+            </div>
+            
+            <!-- Scratchpad Toggle -->
+            <button onclick="toggleScratchpad()" class="bg-[#FFF0F5] hover:bg-[#FFE4E1] border-2 border-[#F72585] active:scale-95 transition text-[#F72585] font-extrabold rounded-full px-4 py-1.5 text-xs md:text-sm shadow-sm flex items-center gap-1">
+                🎨 <span>Doodle Board</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- SCRATCHPAD DRAWING OVERLAY -->
+    <div id="scratchpad" class="hidden fixed inset-0 z-50 bg-white/95 flex flex-col p-4">
+        <div class="flex justify-between items-center mb-2 border-b-2 border-gray-100 pb-2">
+            <h3 class="kids-heading text-lg font-bold text-[#F72585] flex items-center gap-2">
+                🎨 Algebra Doodle Scratchpad
+            </h3>
+            <div class="flex items-center gap-2">
+                <button onclick="clearCanvas()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-3 py-1.5 rounded-xl text-xs">Clear</button>
+                <button onclick="toggleScratchpad()" class="bg-[#F72585] hover:bg-[#b5179e] text-white font-bold px-4 py-1.5 rounded-xl text-xs">Close</button>
+            </div>
+        </div>
+        <div class="flex-1 bg-pink-50/10 border-4 border-dashed border-[#F72585] rounded-2xl relative cursor-crosshair overflow-hidden">
+            <canvas id="scratch-canvas" class="absolute inset-0 w-full h-full"></canvas>
+        </div>
+        <p class="text-xs text-gray-400 mt-2 text-center">Use your finger, stylus, or mouse to sketch your calculations here!</p>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="flex-1 flex flex-col items-center justify-center p-4 max-w-4xl mx-auto w-full my-3">
+        
+        <!-- LOBBY VIEW (QUIZ MAIN MENU) -->
+        <div id="lobby-view" class="w-full bg-white rounded-3xl border-8 border-[#BEE3F8] shadow-xl p-6 md:p-10 text-center space-y-6">
+            <div class="max-w-2xl mx-auto space-y-3">
+                <span class="text-7xl animate-bounce block">🏆</span>
+                <h2 class="kids-heading text-2xl md:text-4xl font-extrabold text-[#2B2D42]">Algebra Quiz Challenge!</h2>
+                <p class="text-sm md:text-base text-gray-600 font-semibold leading-relaxed">
+                    Welcome to the Phase C Algebra Evaluation Arena! Get ready to face <strong>15 interactive challenge questions</strong> featuring direct equations and real-world word problems.
+                </p>
+            </div>
+
+            <!-- RULES DETAILS CARD -->
+            <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-4 border-amber-200 rounded-2xl p-5 text-left max-w-xl mx-auto space-y-3 shadow-sm">
+                <h3 class="kids-heading text-base font-bold text-amber-800 flex items-center gap-2">
+                    🎯 Quiz Information:
+                </h3>
+                <ul class="text-xs text-amber-950 font-semibold space-y-2">
+                    <li class="flex items-center gap-2">✨ <strong>Total Questions:</strong> 15 Curated Questions</li>
+                    <li class="flex items-center gap-2">💎 <strong>Score Reward:</strong> +15 XP for each correct answer</li>
+                    <li class="flex items-center gap-2">📖 <strong>Full Solutions:</strong> Appears automatically after selecting an answer</li>
+                    <li class="flex items-center gap-2">🎨 <strong>Doodle Board:</strong> Click the top-right button if you need to sketch calculations</li>
+                </ul>
+            </div>
+
+            <!-- START BUTTON -->
+            <div class="pt-4">
+                <button onclick="startQuizMode()" class="px-10 py-5 bg-gradient-to-r from-[#F72585] to-[#7209B7] text-white font-extrabold rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition transform duration-200 text-base md:text-lg flex items-center gap-2 mx-auto">
+                    🚀 READY, START QUIZ NOW!
+                </button>
+            </div>
+        </div>
+
+        <!-- QUIZ CHALLENGE VIEW -->
+        <div id="quiz-view" class="hidden w-full bg-white rounded-3xl border-8 border-[#4CC9F0] shadow-xl overflow-hidden flex flex-col justify-between min-h-[500px]">
+            <!-- Top Loading Progress Bar -->
+            <div class="w-full bg-[#EBF8FF] h-3.5">
+                <div id="progress-bar" class="bg-gradient-to-r from-[#4CC9F0] to-[#4895EF] h-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+
+            <!-- Question Area -->
+            <div class="p-6 md:p-10 flex-1 flex flex-col justify-center">
+                <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span id="quiz-category-badge" class="text-xs font-black text-[#4895EF] uppercase tracking-widest">Graduation Algebra Quiz</span>
+                    <span id="quiz-index-indicator" class="text-xs font-bold text-gray-400 bg-slate-50 px-2.5 py-1 rounded-full">Question 1 / 15</span>
+                </div>
+
+                <!-- Math Equation Box -->
+                <div id="problem-box" class="space-y-3">
+                    <!-- Dynamic rendering -->
+                </div>
+
+                <!-- Grid Options -->
+                <div id="options-grid" class="grid sm:grid-cols-2 gap-3 mt-5">
+                    <!-- Dynamic rendering -->
+                </div>
+
+                <!-- Explanation Box -->
+                <div id="explanation-box" class="hidden mt-6 p-4 rounded-2xl text-xs md:text-sm leading-relaxed border-2">
+                    <!-- Dynamic rendering -->
+                </div>
+            </div>
+
+            <!-- Quiz Navigation Footer -->
+            <div class="bg-[#F8F9FA] border-t-2 border-slate-100 px-6 py-4 flex justify-between items-center">
+                <button onclick="backToHub()" class="text-xs font-extrabold text-[#4895EF] hover:text-[#3f37c9] flex items-center gap-1 bg-white border border-[#BEE3F8] px-4 py-2.5 rounded-xl shadow-sm transition">
+                    ◀ Stop & Exit
+                </button>
+                <button id="next-question-btn" onclick="nextQuestion()" class="bg-gradient-to-r from-gray-400 to-gray-500 text-white font-extrabold px-6 py-2.5 rounded-xl text-xs md:text-sm shadow-md transition flex items-center gap-1 cursor-pointer">
+                    Skip / Next ▶
+                </button>
+            </div>
+        </div>
+
+        <!-- OUTCOME SUMMARY VIEW -->
+        <div id="outcome-view" class="hidden w-full bg-white rounded-3xl border-8 border-[#BEE3F8] shadow-xl p-6 md:p-10 text-center space-y-6">
+            <span class="text-7xl block animate-bounce" id="outcome-emoji">🏆</span>
+            <div class="space-y-2">
+                <h2 class="kids-heading text-3xl font-extrabold text-[#2B2D42]" id="outcome-title">Quiz Completed!</h2>
+                <p class="text-sm text-gray-500 font-semibold" id="outcome-subtitle">You did an amazing job.</p>
+            </div>
+
+            <div class="bg-[#EBF8FF] border-2 border-dashed border-[#90CDF4] rounded-3xl p-6 max-w-md mx-auto grid grid-cols-2 gap-4">
+                <div>
+                    <span class="text-xs font-bold text-blue-500 uppercase block">XP Earned</span>
+                    <span class="text-2xl font-extrabold text-[#3F37C9]" id="outcome-xp">0 XP</span>
+                </div>
+                <div>
+                    <span class="text-xs font-bold text-blue-500 uppercase block">Accuracy Rate</span>
+                    <span class="text-2xl font-extrabold text-[#3F37C9]" id="outcome-accuracy">0%</span>
+                </div>
+            </div>
+
+            <!-- Profile Badge Learner Profile IB -->
+            <div class="bg-[#FFFDF5] border border-amber-200 p-4 rounded-2xl max-w-md mx-auto text-xs space-y-1.5 text-left">
+                <span class="font-extrabold text-amber-700 uppercase tracking-widest block text-[10px] text-center">Your IB Learner Profile Badge</span>
+                <p class="font-extrabold text-slate-800 text-sm text-center">💡 Critical Thinker & Reflective</p>
+                <p class="text-slate-500 text-center mt-1">By completing this challenge, you have demonstrated cognitive resilience and outstanding logical problem-solving skills independently!</p>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-3 pt-2">
+                <button onclick="backToHub()" class="px-6 py-3 bg-white border-2 border-[#BEE3F8] hover:bg-slate-50 text-[#4895EF] font-black rounded-2xl text-xs md:text-sm shadow-sm transition">
+                    Back to Main Menu
+                </button>
+                <button onclick="restartQuiz()" class="px-6 py-3 bg-gradient-to-r from-[#4CC9F0] to-[#4895EF] text-white font-black rounded-2xl text-xs md:text-sm shadow-md hover:scale-105 transition">
+                    Restart Quiz
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FLOATING TOAST NOTIFICATION -->
+    <div id="toast" class="hidden fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 text-white font-bold px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-2 animate-bounce">
+        <span id="toast-icon">✨</span> <span id="toast-text">Awesome!</span>
+    </div>
+
+    <!-- CONFETTI CELEBRATION CANVAS -->
+    <canvas id="confetti" class="fixed inset-0 pointer-events-none z-50 w-full h-full hidden"></canvas>
+
+    <!-- FOOTER -->
+    <footer class="text-center text-xs text-slate-400 py-4 border-t border-slate-200/50 bg-white/50 w-full">
+        <p>© 2026 PLSV Transition Class 5 Masterclass Quiz. Powered by KaTeX Engine.</p>
+    </footer>
+
+    <!-- MAIN APP JAVASCRIPT SYSTEM -->
+    <script>
+        // --- 1. AUDIO SYNTHESIZER ---
+        let audioCtx;
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); 
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08); 
+                    osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.16); 
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.4);
+                } else if (type === 'incorrect') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(220, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.08);
+                    gain.gain.setValueAtTime(0.03, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.08);
+                } else if (type === 'level-up') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(261.63, ctx.currentTime);
+                    osc.frequency.setValueAtTime(329.63, ctx.currentTime + 0.1);
+                    osc.frequency.setValueAtTime(392.00, ctx.currentTime + 0.2);
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.6);
+                }
+            } catch (e) {
+                console.log("Audio contexts blocked.");
+            }
+        }
+
+        // --- 2. 15 ALGEBRA QUESTIONS DATABASE (Fully Translated into English & Equations Sanitized) ---
+        const questionDatabase = [
+            {
+                title: "Word Problem: Pine Tree Pattern (T-Chart)",
+                question: "A pine tree growth pattern follows the formula: $y = 4x + 2$ (where $x$ is the fertilization stage and $y$ is the final height in cm). What is the height of the pine tree at fertilization stage 6?",
+                options: ["$26\\text{ cm}$", "$24\\text{ cm}$", "$28\\text{ cm}$", "$20\\text{ cm}$"],
+                correct: "$26\\text{ cm}$",
+                explanation: "Substitute the value $x = 6$ into the formula:<br>$$y = 4(6) + 2$$<br>$$y = 24 + 2 = 26\\text{ cm}$$."
+            },
+            {
+                title: "Direct Equation: One Step",
+                question: "Solve the following one-step equation to find the value of $x$:<br><strong class='text-blue-600 text-lg font-mono'>$$x - 18 = 42$$</strong>",
+                options: ["$x = 60$", "$x = 54$", "$x = 24$", "$x = 30$"],
+                correct: "$x = 60$",
+                explanation: "Move the constant $-18$ to the right side using its inverse operation (addition):<br>$$x = 42 + 18$$<br>$$x = 60$$."
+            },
+            {
+                title: "Direct Equation: Two Steps",
+                question: "Solve the two-step equation below to find the value of $y$:<br><strong class='text-blue-600 text-lg font-mono'>$$3y + 7 = 34$$</strong>",
+                options: ["$y = 9$", "$y = 7$", "$y = 11$", "$y = 8$"],
+                correct: "$y = 9$",
+                explanation: "<strong>Step 1:</strong> Subtract $7$ from both sides:<br>$$3y = 34 - 7 \\implies 3y = 27$$<br><strong>Step 2:</strong> Divide both sides by $3$:<br>$$y = \\frac{27}{3} \\implies y = 9$$."
+            },
+            {
+                title: "Word Problem: Rina's Dolls (Algebraic Translation)",
+                question: "Susi has $b$ dolls. Rina has half as many dolls as Susi minus $2$ dolls. Which algebraic expression correctly represents the number of Rina's dolls?",
+                options: ["$\\frac{b}{2} - 2$", "$2b - 2$", "$\\frac{b - 2}{2}$", "$b - 2$"],
+                correct: "$\\frac{b}{2} - 2$",
+                explanation: "Half of Susi's dolls ($b$) is written as $\\frac{b}{2}$ or $\\frac{1}{2}b$.<br>Subtracting 2 means subtracting $- 2$.<br>The algebraic expression is: $$\\frac{b}{2} - 2$$."
+            },
+            {
+                title: "Pattern Investigation: T-Chart",
+                question: "Find the relationship pattern between input ($x$) and output ($y$) from the following T-Chart Table:<br>• $x = 1 \\rightarrow y = 5$<br>• $x = 2 \\rightarrow y = 9$<br>• $x = 3 \\rightarrow y = 13$<br>Which equation rule matches the values perfectly?",
+                options: ["$y = 4x + 1$", "$y = 5x$", "$y = 3x + 2$", "$y = 2x + 3$"],
+                correct: "$y = 4x + 1$",
+                explanation: "Let's test the rule $y = 4x + 1$:<br>• For $x = 1 \\implies 4(1) + 1 = 5$ (Correct)<br>• For $x = 2 \\implies 4(2) + 1 = 9$ (Correct)<br>• For $x = 3 \\implies 4(3) + 1 = 13$ (Correct)."
+            },
+            {
+                title: "Word Problem: Dimas Buying Books",
+                question: "Dimas buys $4$ notebooks with a price of $b$ rupiah each and a pencil for Rp3,000.00. If Dimas's total spent is Rp15,000.00, which algebraic equation model is correct?",
+                options: ["$4b + 3000 = 15000$", "$b + 3000 = 15000$", "$4(b + 3000) = 15000$", "$4b - 3000 = 15000$"],
+                correct: "$4b + 3000 = 15000$",
+                explanation: "The price of $4$ notebooks is $4 \\times b = 4b$.<br>The price of one pencil is Rp3,000.00.<br>The total spent is the sum of both:<br>$$4b + 3,000 = 15,000$$."
+            },
+            {
+                title: "Direct Equation: Two-Step Division",
+                question: "Determine the value of variable $a$ from the following equation:<br><strong class='text-blue-600 text-lg font-mono'>$$\\frac{a}{5} + 6 = 14$$</strong>",
+                options: ["$a = 40$", "$a = 25$", "$a = 10$", "$a = 35$"],
+                correct: "$a = 40$",
+                explanation: "<strong>Step 1:</strong> Subtract $6$ from both sides:<br>$$\\frac{a}{5} = 14 - 6 \\implies \\frac{a}{5} = 8$$<br><strong>Step 2:</strong> Multiply both sides by $5$:<br>$$a = 8 \\times 5 \\implies a = 40$$."
+            },
+            {
+                title: "Word Problem: Rabbits in the Cage",
+                question: "The number of rabbits in a cage ($k$) is reduced by $6$ because they are sold to another farmer, leaving $15$ rabbits in the cage. What is the equation model and the initial number of rabbits?",
+                options: ["$k - 6 = 15$; initial $21$ rabbits", "$k + 6 = 15$; initial $9$ rabbits", "$6k = 15$; initial $2.5$ rabbits", "$k - 15 = 6$; initial $9$ rabbits"],
+                correct: "$k - 6 = 15$; initial $21$ rabbits",
+                explanation: "The initial number of rabbits ($k$) minus $6$ can be written as $k - 6$.<br>The remaining rabbits are $15$, so the equation is: $$k - 6 = 15$$<br>Thus, the initial number of rabbits is:<br>$$k = 15 + 6 = 21\\text{ rabbits}$$."
+            },
+            {
+                title: "Geometric Pattern: Matchstick Arrangements",
+                question: "Arrangements of matchsticks form a sequence of triangles. Stage $n$ requires $2n + 1$ matchsticks. How many matchsticks are needed to build stage 12?",
+                options: ["$25\\text{ matchsticks}$", "$24\\text{ matchsticks}$", "$26\\text{ matchsticks}$", "$23\\text{ matchsticks}$"],
+                correct: "$25\\text{ matchsticks}$",
+                explanation: "Substitute $n = 12$ into the pattern formula:<br>$$\\text{Number of matchsticks} = 2(12) + 1$$<br>$$\\text{Number of matchsticks} = 24 + 1 = 25\\text{ matchsticks}$$."
+            },
+            {
+                title: "Direct Equation: Two-Step Subtraction",
+                question: "Find the solution for the following linear equation:<br><strong class='text-blue-600 text-lg font-mono'>$$5m - 12 = 18$$</strong>",
+                options: ["$m = 6$", "$m = 5$", "$m = 10$", "$m = 8$"],
+                correct: "$m = 6$",
+                explanation: "<strong>Step 1:</strong> Add $12$ to both sides:<br>$$5m = 18 + 12 \\implies 5m = 30$$<br><strong>Step 2:</strong> Divide both sides by $5$:<br>$$m = \\frac{30}{5} \\implies m = 6$$."
+            },
+            {
+                title: "Word Problem: Father & Budi's Age Comparison",
+                question: "Father's age now is $3$ times Budi's age ($b$). If the difference in their age is $30$ years, which equation is correct to calculate Budi's age?",
+                options: ["$3b - b = 30$", "$3b + b = 30$", "$b - 30 = 3b$", "$3b = 30$"],
+                correct: "$3b - b = 30$",
+                explanation: "Father's age = $3b$. Budi's age = $b$.<br>The difference in their age is $30$ years:<br>$$\\text{Father's age} - \\text{Budi's age} = 30$$<br>$$3b - b = 30$$."
+            },
+            {
+                title: "Direct Equation: Variable on Both Sides",
+                question: "Solve the following equation to find the value of variable $p$:<br><strong class='text-blue-600 text-lg font-mono'>$$6p - 5 = 2p + 11$$</strong>",
+                options: ["$p = 4$", "$p = 3$", "$p = 2$", "$p = 5$"],
+                correct: "$p = 4$",
+                explanation: "Collect the terms with variable $p$ to the left side and constants to the right side:<br>$$6p - 2p = 11 + 5$$<br>$$4p = 16$$<br>$$p = \\frac{16}{4} \\implies p = 4$$."
+            },
+            {
+                title: "Word Problem: Sharing Sweet Chocolates",
+                question: "A box of chocolates is divided equally among $4$ children, and each child also receives an extra bonus of $2$ chocolates from Mom. If each child brings home a total of $8$ chocolates, how many chocolates ($c$) were in the box originally?",
+                options: ["$24\\text{ chocolates}$", "$16\\text{ chocolates}$", "$32\\text{ chocolates}$", "$20\\text{ chocolates}$"],
+                correct: "$24\\text{ chocolates}$",
+                explanation: "Chocolates divided equally among $4$ children: $\\frac{c}{4}$.<br>Each gets an extra $2$: $\\frac{c}{4} + 2$.<br>The total is $8$ chocolates:<br>$$\\frac{c}{4} + 2 = 8 \\implies \\frac{c}{4} = 6 \\implies c = 24\\text{ chocolates}$$."
+            },
+            {
+                title: "Direct Equation: Algebraic Fraction Operation",
+                question: "Find the value of variable $w$ that satisfies the following equation:<br><strong class='text-blue-600 text-lg font-mono'>$$\\frac{2w}{3} = 8$$</strong>",
+                options: ["$w = 12$", "$w = 8$", "$w = 16$", "$w = 6$"],
+                correct: "$w = 12$",
+                explanation: "Multiply both sides by $3$ to eliminate the denominator:<br>$$2w = 8 \\times 3 \\implies 2w = 24$$<br>Divide both sides by $2$:<br>$$w = \\frac{24}{2} \\implies w = 12$$."
+            },
+            {
+                title: "Word Problem: Rectangle Perimeter",
+                question: "The perimeter of a rectangular photo frame is $40$ cm. If the width is $8$ cm and the length is represented by $p$ cm, determine the length of the photo frame ($p$)!",
+                options: ["$p = 12\\text{ cm}$", "$p = 10\\text{ cm}$", "$p = 14\\text{ cm}$", "$p = 8\\text{ cm}$"],
+                correct: "$p = 12\\text{ cm}$",
+                explanation: "The formula for the perimeter of a rectangle is $2(p + w) = P$.<br>Substitute width of $8$ and Perimeter of $40$ into the formula:<br>$$2(p + 8) = 40$$<br>Divide both sides by $2$:<br>$$p + 8 = 20 \\implies p = 20 - 8 = 12\\text{ cm}$$."
+            }
+        ];
+
+        // --- 3. SYSTEM STATE ---
+        let scoreXP = 0;
+        let currentIdx = 0;
+        let correctAnswersCount = 0;
+        let activeQuestions = [];
+        let hasAnswered = false;
+
+        // Canvas Scratchpad State
+        const canvas = document.getElementById('scratch-canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        // Confetti Context State
+        const confettiCanvas = document.getElementById('confetti');
+        const confettiCtx = confettiCanvas.getContext('2d');
+        let confettiActive = false;
+        let particles = [];
+
+        // --- 4. NAVIGATION VIEW CONTROLLER ---
+        function showSection(sectionId) {
+            playSound('click');
+            // Hide all
+            document.getElementById('lobby-view').classList.add('hidden');
+            document.getElementById('quiz-view').classList.add('hidden');
+            document.getElementById('outcome-view').classList.add('hidden');
+
+            // Show current section
+            document.getElementById(`${sectionId}-view`).classList.remove('hidden');
+        }
+
+        function backToHub() {
+            showSection('lobby');
+        }
+
+        // --- 5. INITIAL ONLOAD AND RENDERING CODES ---
+        window.onload = function() {
+            setTimeout(() => {
+                triggerMathRender(document.body);
+            }, 500);
+
+            initCanvas();
+            setupTouchGestures();
+        }
+
+        function initKaTeX() {
+            triggerMathRender(document.body);
+        }
+
+        function triggerMathRender(element) {
+            if (typeof renderMathInElement !== 'undefined') {
+                try {
+                    renderMathInElement(element || document.body, {
+                        delimiters: [
+                            {left: '$$', right: '$$', display: true},
+                            {left: '$', right: '$', display: false}
+                        ],
+                        throwOnError: false
+                    });
+                } catch (e) {
+                    console.error("Math parsing failed: ", e);
+                }
+            }
+        }
+
+        // --- 6. QUIZ MANAGEMENT ENGINE ---
+        function startQuizMode() {
+            currentIdx = 0;
+            correctAnswersCount = 0;
+            activeQuestions = [...questionDatabase];
+
+            document.getElementById('lobby-view').classList.add('hidden');
+            document.getElementById('outcome-view').classList.add('hidden');
+            document.getElementById('quiz-view').classList.remove('hidden');
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            hasAnswered = false;
+            const problem = activeQuestions[currentIdx];
+
+            document.getElementById('quiz-index-indicator').innerText = `Question ${currentIdx + 1} / ${activeQuestions.length}`;
+            
+            // Progress Bar Width
+            const progressPercent = (currentIdx / activeQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            // Render Math equations
+            document.getElementById('problem-box').innerHTML = `
+                <h3 class="kids-heading text-lg font-bold text-slate-800">${problem.title}</h3>
+                <p class="text-sm md:text-base text-slate-600 leading-relaxed">${problem.question}</p>
+            `;
+
+            // Options grid shuffle
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+
+            const shuffledOpts = shuffleArray(problem.options);
+            shuffledOpts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-4 bg-[#F8F9FA] hover:bg-slate-100 border-2 border-slate-200 rounded-2xl text-xs md:text-sm font-bold text-slate-800 transition btn-bounce flex justify-between items-center q-option-btn";
+                btn.innerHTML = `<span>${opt}</span><span class="opacity-50 text-[10px]">CHOOSE ➔</span>`;
+                btn.onclick = () => verifyUserResponse(btn, opt, problem.correct, problem.explanation);
+                grid.appendChild(btn);
+            });
+
+            // Reset navigation footer styles
+            document.getElementById('explanation-box').classList.add('hidden');
+            const nextBtn = document.getElementById('next-question-btn');
+            nextBtn.innerText = "Skip / Next ▶";
+            nextBtn.className = "bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white font-extrabold px-6 py-2.5 rounded-xl text-xs md:text-sm shadow-md transition flex items-center gap-1 cursor-pointer";
+
+            triggerMathRender(document.getElementById('quiz-view'));
+        }
+
+        function verifyUserResponse(element, chosen, correct, explanation) {
+            if (hasAnswered) return;
+            hasAnswered = true;
+
+            const isCorrect = chosen === correct;
+
+            // Highlight matching choices
+            const buttons = document.querySelectorAll('.q-option-btn');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-40');
+            });
+
+            element.classList.remove('opacity-40');
+            if (isCorrect) {
+                element.className = "w-full p-4 border-2 border-emerald-500 bg-emerald-100 text-emerald-800 rounded-2xl text-xs md:text-sm font-bold flex justify-between items-center";
+                element.innerHTML = `<span>${chosen}</span> <span class="bg-emerald-500 text-white px-2.5 py-1 rounded-lg text-[9px] font-extrabold">✓ CORRECT! (+15 XP)</span>`;
+                playSound('correct');
+                scoreXP += 15;
+                correctAnswersCount++;
+                document.getElementById('xp-display').innerText = `${scoreXP} XP`;
+                triggerConfetti();
+                showToast("✨ Perfect! You are amazing!", "bg-emerald-500");
+            } else {
+                element.className = "w-full p-4 border-2 border-rose-500 bg-rose-100 text-rose-800 rounded-2xl text-xs md:text-sm font-bold flex justify-between items-center";
+                element.innerHTML = `<span>${chosen}</span> <span class="bg-rose-500 text-white px-2.5 py-1 rounded-lg text-[9px] font-extrabold">✕ INCORRECT</span>`;
+                playSound('incorrect');
+                showToast("💡 Keep trying, let's learn how to solve it!", "bg-rose-500");
+            }
+
+            // Reveal explanation panel
+            const explanationBox = document.getElementById('explanation-box');
+            explanationBox.className = `mt-6 p-4 rounded-2xl text-xs md:text-sm leading-relaxed border-2 ${isCorrect ? 'border-emerald-200 bg-emerald-50 text-emerald-950' : 'border-rose-200 bg-rose-50 text-rose-950'} animate-fade-in`;
+            explanationBox.innerHTML = `
+                <div class="font-extrabold text-sm mb-1">📖 Algebra Solution:</div>
+                <div>${explanation}</div>
+            `;
+            explanationBox.classList.remove('hidden');
+
+            // Change next button status
+            const nextBtn = document.getElementById('next-question-btn');
+            nextBtn.innerText = "Next Question ▶";
+            nextBtn.className = "bg-gradient-to-r from-[#4CC9F0] to-[#4895EF] text-white hover:scale-105 font-extrabold px-6 py-2.5 rounded-xl text-xs md:text-sm shadow-md transition flex items-center gap-1 cursor-pointer";
+
+            triggerMathRender(explanationBox);
+            triggerMathRender(element);
+        }
+
+        function nextQuestion() {
+            playSound('click');
+            currentIdx++;
+            if (currentIdx < activeQuestions.length) {
+                loadQuestion();
+            } else {
+                showFinalResults();
+            }
+        }
+
+        function showFinalResults() {
+            document.getElementById('quiz-view').classList.add('hidden');
+            document.getElementById('outcome-view').classList.remove('hidden');
+
+            const accuracy = Math.round((correctAnswersCount / activeQuestions.length) * 100);
+            document.getElementById('outcome-xp').innerText = `+${correctAnswersCount * 15} XP`;
+            document.getElementById('outcome-accuracy').innerText = `${accuracy}%`;
+
+            const title = document.getElementById('outcome-title');
+            const subtitle = document.getElementById('outcome-subtitle');
+            const emoji = document.getElementById('outcome-emoji');
+
+            if (accuracy === 100) {
+                emoji.innerText = "👑⭐";
+                title.innerText = "Grade 5 Algebra Grandmaster!";
+                subtitle.innerText = "Amazing! Your understanding of equations and patterns is perfectly ready for next grade challenges.";
+                triggerConfetti();
+            } else if (accuracy >= 70) {
+                emoji.innerText = "😎🏆";
+                title.innerText = "Highly Commendable!";
+                subtitle.innerText = "You successfully cracked most of the algebraic equations and balancing puzzles.";
+                triggerConfetti();
+            } else {
+                emoji.innerText = "🤔🌱";
+                title.innerText = "Keep on Learning!";
+                subtitle.innerText = "Let's review the algebraic clues and step instructions to make your foundations stronger.";
+            }
+        }
+
+        function restartQuiz() {
+            startQuizMode();
+        }
+
+        // --- 7. SHUFFLE ARRAY UTILITY ---
+        function shuffleArray(array) {
+            let shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // --- 8. DOODLE CANVAS SYSTEM (Scratchpad) ---
+        function toggleScratchpad() {
+            const pad = document.getElementById('scratchpad');
+            pad.classList.toggle('hidden');
+            if (!pad.classList.contains('hidden')) {
+                resizeCanvas();
+            }
+        }
+
+        function initCanvas() {
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                ctx.beginPath();
+                const r = canvas.getBoundingClientRect();
+                ctx.moveTo(e.clientX - r.left, e.clientY - r.top);
+            });
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDrawing) return;
+                const r = canvas.getBoundingClientRect();
+                ctx.lineTo(e.clientX - r.left, e.clientY - r.top);
+                ctx.stroke();
+            });
+            canvas.addEventListener('mouseup', () => isDrawing = false);
+
+            // Touch support
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isDrawing = true;
+                ctx.beginPath();
+                const t = e.touches[0];
+                const r = canvas.getBoundingClientRect();
+                ctx.moveTo(t.clientX - r.left, t.clientY - r.top);
+            });
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isDrawing) return;
+                const t = e.touches[0];
+                const r = canvas.getBoundingClientRect();
+                ctx.lineTo(t.clientX - r.left, t.clientY - r.top);
+                ctx.stroke();
+            });
+            canvas.addEventListener('touchend', () => isDrawing = false);
+        }
+
+        function resizeCanvas() {
+            const parent = canvas.parentNode;
+            canvas.width = parent.clientWidth;
+            canvas.height = parent.clientHeight;
+            ctx.lineCap = 'round';
+            ctx.lineWidth = 3.5;
+            ctx.strokeStyle = '#F72585'; 
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // --- 9. SWIPE GESTURES ---
+        let startX = 0;
+        function setupTouchGestures() {
+            const wrapper = document.getElementById('quiz-view');
+            wrapper.addEventListener('touchstart', (e) => {
+                startX = e.changedTouches[0].screenX;
+            }, false);
+
+            wrapper.addEventListener('touchend', (e) => {
+                const endX = e.changedTouches[0].screenX;
+                const threshold = 80;
+                if (startX - endX > threshold) {
+                    nextQuestion();
+                }
+            }, false);
+        }
+
+        // --- 10. TOAST NOTIFIER ---
+        function showToast(text, bgClass) {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toast-text');
+            toast.className = `fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 text-white font-black px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-2 animate-bounce ${bgClass}`;
+            toastText.innerHTML = text;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 4000);
+        }
+
+        // --- 11. CONFETTI CELEBRATION EFFECT ---
+        function triggerConfetti() {
+            confettiActive = true;
+            confettiCanvas.classList.remove('hidden');
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+            
+            particles = [];
+            for (let i = 0; i < 70; i++) {
+                particles.push({
+                    x: Math.random() * confettiCanvas.width,
+                    y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+                    r: Math.random() * 5 + 4,
+                    d: Math.random() * confettiCanvas.height,
+                    color: `hsl(${Math.random() * 360}, 100%, 70%)`,
+                    tilt: Math.random() * 10 - 5,
+                    tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+                    tiltAngle: 0
+                });
+            }
+
+            animateConfetti();
+            setTimeout(() => {
+                confettiActive = false;
+                confettiCanvas.classList.add('hidden');
+            }, 2500);
+        }
+
+        function animateConfetti() {
+            if (!confettiActive) return;
+            confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            
+            particles.forEach((p, idx) => {
+                p.tiltAngle += p.tiltAngleIncremental;
+                p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+                p.x += Math.sin(p.tiltAngle);
+                p.tilt = Math.sin(p.tiltAngle - idx / 3) * 15;
+
+                confettiCtx.beginPath();
+                confettiCtx.lineWidth = p.r;
+                confettiCtx.strokeStyle = p.color;
+                confettiCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                confettiCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                confettiCtx.stroke();
+            });
+
+            requestAnimationFrame(animateConfetti);
+        }
+    </script>
+</body>
+</html>

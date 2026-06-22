@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Aljabar Interaktif - Fase C (Kelas 4 & 5)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- KaTeX for beautiful Math equations -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="initKaTeX()"></script>
+
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #FDFDF7;
+        }
+        .kids-heading {
+            font-family: 'Fredoka', sans-serif;
+        }
+        .bounce-hover {
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .bounce-hover:hover {
+            transform: scale(1.03);
+        }
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-[#FFFDF9] via-[#F0F9FF] to-[#FFF5F5] min-h-screen flex flex-col justify-between overflow-x-hidden select-none">
+
+    <!-- HEADER -->
+    <header class="bg-white/90 backdrop-blur-md border-b-4 border-[#4CC9F0] py-3.5 px-6 flex justify-between items-center sticky top-0 z-40 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-tr from-[#4CC9F0] to-[#4895EF] text-white p-2.5 rounded-2xl shadow-md">
+                <svg class="w-8 h-8 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 .364l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="kids-heading text-xl md:text-2xl font-bold text-[#2B2D42]">Algebra Quiz 15!</h1>
+                <p class="text-[10px] text-[#4895EF] font-black tracking-widest uppercase">Evaluasi Aljabar Konseptual & Cerita</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-2 md:gap-3">
+            <!-- XP Badge -->
+            <div class="bg-[#EBF8FF] border-2 border-[#4895EF] rounded-full px-3 py-1.5 md:px-4 flex items-center gap-1.5 shadow-sm">
+                <span class="text-sm md:text-base">⭐</span>
+                <span id="xp-display" class="font-extrabold text-[#3F37C9] text-xs md:text-sm">0 XP</span>
+            </div>
+            
+            <!-- Scratchpad Toggle -->
+            <button onclick="toggleScratchpad()" class="bg-[#FFF0F5] hover:bg-[#FFE4E1] border-2 border-[#F72585] active:scale-95 transition text-[#F72585] font-extrabold rounded-full px-4 py-1.5 text-xs md:text-sm shadow-sm flex items-center gap-1">
+                🎨 <span>Cakar Gambar</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- SCRATCHPAD DRAWING OVERLAY -->
+    <div id="scratchpad" class="hidden fixed inset-0 z-50 bg-white/95 flex flex-col p-4">
+        <div class="flex justify-between items-center mb-2 border-b-2 border-gray-100 pb-2">
+            <h3 class="kids-heading text-lg font-bold text-[#F72585] flex items-center gap-2">
+                🎨 Papan Coret-Coret Aljabar (Doodle Scratchpad)
+            </h3>
+            <div class="flex items-center gap-2">
+                <button onclick="clearCanvas()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-3 py-1.5 rounded-xl text-xs">Bersihkan</button>
+                <button onclick="toggleScratchpad()" class="bg-[#F72585] hover:bg-[#b5179e] text-white font-bold px-4 py-1.5 rounded-xl text-xs">Tutup</button>
+            </div>
+        </div>
+        <div class="flex-1 bg-pink-50/10 border-4 border-dashed border-[#F72585] rounded-2xl relative cursor-crosshair overflow-hidden">
+            <canvas id="scratch-canvas" class="absolute inset-0 w-full h-full"></canvas>
+        </div>
+        <p class="text-xs text-gray-400 mt-2 text-center">Gunakan jari, stylus, atau mouse untuk mencakar perhitungan polamu di sini!</p>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="flex-1 flex flex-col items-center justify-center p-4 max-w-4xl mx-auto w-full my-3">
+        
+        <!-- LOBBY VIEW (MENU UTAMA KUIS) -->
+        <div id="lobby-view" class="w-full bg-white rounded-3xl border-8 border-[#BEE3F8] shadow-xl p-6 md:p-10 text-center space-y-6">
+            <div class="max-w-2xl mx-auto space-y-3">
+                <span class="text-7xl animate-bounce block">🏆</span>
+                <h2 class="kids-heading text-2xl md:text-4xl font-extrabold text-[#2B2D42]">Tantangan Kuis Aljabar!</h2>
+                <p class="text-sm md:text-base text-gray-600 font-semibold leading-relaxed">
+                    Selamat datang di Arena Evaluasi Aljabar Fase C! Bersiaplah menghadapi <strong>15 soal tantangan</strong> interaktif yang terdiri dari soal pemecahan persamaan langsung dan soal cerita kontekstual.
+                </p>
+            </div>
+
+            <!-- CARD DETAIL ATURAN -->
+            <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-4 border-amber-200 rounded-2xl p-5 text-left max-w-xl mx-auto space-y-3 shadow-sm">
+                <h3 class="kids-heading text-base font-bold text-amber-800 flex items-center gap-2">
+                    🎯 Informasi Sesi Kuis:
+                </h3>
+                <ul class="text-xs text-amber-950 font-semibold space-y-2">
+                    <li class="flex items-center gap-2">✨ <strong>Total Soal:</strong> 15 Pertanyaan Terkurasi</li>
+                    <li class="flex items-center gap-2">💎 <strong>Skor XP:</strong> +15 XP untuk setiap jawaban yang benar</li>
+                    <li class="flex items-center gap-2">📖 <strong>Pembahasan Lengkap:</strong> Muncul otomatis setiap Anda selesai memilih</li>
+                    <li class="flex items-center gap-2">🎨 <strong>Papan Doodle:</strong> Klik tombol kanan atas jika butuh mencakar coretan</li>
+                </ul>
+            </div>
+
+            <!-- START BUTTON -->
+            <div class="pt-4">
+                <button onclick="startQuizMode()" class="px-10 py-5 bg-gradient-to-r from-[#F72585] to-[#7209B7] text-white font-extrabold rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition transform duration-200 text-base md:text-lg flex items-center gap-2 mx-auto">
+                    🚀 SIAP, MULAI KUIS SEKARANG!
+                </button>
+            </div>
+        </div>
+
+        <!-- QUIZ CHALLENGE VIEW -->
+        <div id="quiz-view" class="hidden w-full bg-white rounded-3xl border-8 border-[#4CC9F0] shadow-xl overflow-hidden flex flex-col justify-between min-h-[500px]">
+            <!-- Top Loading Progress Bar -->
+            <div class="w-full bg-[#EBF8FF] h-3.5">
+                <div id="progress-bar" class="bg-gradient-to-r from-[#4CC9F0] to-[#4895EF] h-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+
+            <!-- Question Area -->
+            <div class="p-6 md:p-10 flex-1 flex flex-col justify-center">
+                <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span id="quiz-category-badge" class="text-xs font-black text-[#4895EF] uppercase tracking-widest">Kuis Aljabar Naik Kelas</span>
+                    <span id="quiz-index-indicator" class="text-xs font-bold text-gray-400 bg-slate-50 px-2.5 py-1 rounded-full">Soal 1 / 15</span>
+                </div>
+
+                <!-- Math Equation Box -->
+                <div id="problem-box" class="space-y-3">
+                    <!-- Dynamic rendering -->
+                </div>
+
+                <!-- Grid Options -->
+                <div id="options-grid" class="grid sm:grid-cols-2 gap-3 mt-5">
+                    <!-- Dynamic rendering -->
+                </div>
+
+                <!-- Explanation Box -->
+                <div id="explanation-box" class="hidden mt-6 p-4 rounded-2xl text-xs md:text-sm leading-relaxed border-2">
+                    <!-- Dynamic rendering -->
+                </div>
+            </div>
+
+            <!-- Quiz Navigation Footer -->
+            <div class="bg-[#F8F9FA] border-t-2 border-slate-100 px-6 py-4 flex justify-between items-center">
+                <button onclick="backToHub()" class="text-xs font-extrabold text-[#4895EF] hover:text-[#3f37c9] flex items-center gap-1 bg-white border border-[#BEE3F8] px-4 py-2.5 rounded-xl shadow-sm transition">
+                    ◀ Berhenti & Keluar
+                </button>
+                <button id="next-question-btn" onclick="nextQuestion()" class="bg-gradient-to-r from-gray-400 to-gray-500 text-white font-extrabold px-6 py-2.5 rounded-xl text-xs md:text-sm shadow-md transition flex items-center gap-1 cursor-pointer">
+                    Lewati / Lanjut ▶
+                </button>
+            </div>
+        </div>
+
+        <!-- OUTCOME SUMMARY VIEW -->
+        <div id="outcome-view" class="hidden w-full bg-white rounded-3xl border-8 border-[#BEE3F8] shadow-xl p-6 md:p-10 text-center space-y-6">
+            <span class="text-7xl block animate-bounce" id="outcome-emoji">🏆</span>
+            <div class="space-y-2">
+                <h2 class="kids-heading text-3xl font-extrabold text-[#2B2D42]" id="outcome-title">Sesi Kuis Selesai!</h2>
+                <p class="text-sm text-gray-500 font-semibold" id="outcome-subtitle">Kamu sangat luar biasa.</p>
+            </div>
+
+            <div class="bg-[#EBF8FF] border-2 border-dashed border-[#90CDF4] rounded-3xl p-6 max-w-md mx-auto grid grid-cols-2 gap-4">
+                <div>
+                    <span class="text-xs font-bold text-blue-500 uppercase block">XP yang Didapat</span>
+                    <span class="text-2xl font-extrabold text-[#3F37C9]" id="outcome-xp">0 XP</span>
+                </div>
+                <div>
+                    <span class="text-xs font-bold text-blue-500 uppercase block">Akurasi Jawaban</span>
+                    <span class="text-2xl font-extrabold text-[#3F37C9]" id="outcome-accuracy">0%</span>
+                </div>
+            </div>
+
+            <!-- Profile Badge Learner Profile IB -->
+            <div class="bg-[#FFFDF5] border border-amber-200 p-4 rounded-2xl max-w-md mx-auto text-xs space-y-1.5 text-left">
+                <span class="font-extrabold text-amber-700 uppercase tracking-widest block text-[10px] text-center">Lencana Profil Pelajar IB Kamu</span>
+                <p class="font-extrabold text-slate-800 text-sm text-center">💡 Berpikir Kritis & Reflektif (Critical Thinker)</p>
+                <p class="text-slate-500 text-center mt-1">Dengan menyelesaikan tantangan ini, kamu telah membuktikan ketangguhan kognitif serta kecakapan logika pemecahan masalah secara mandiri!</p>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-3 pt-2">
+                <button onclick="backToHub()" class="px-6 py-3 bg-white border-2 border-[#BEE3F8] hover:bg-slate-50 text-[#4895EF] font-black rounded-2xl text-xs md:text-sm shadow-sm transition">
+                    Kembali ke Menu Utama
+                </button>
+                <button onclick="restartQuiz()" class="px-6 py-3 bg-gradient-to-r from-[#4CC9F0] to-[#4895EF] text-white font-black rounded-2xl text-xs md:text-sm shadow-md hover:scale-105 transition">
+                    Ulangi Kuis
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FLOATING TOAST NOTIFICATION -->
+    <div id="toast" class="hidden fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 text-white font-bold px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-2 animate-bounce">
+        <span id="toast-icon">✨</span> <span id="toast-text">Luar biasa!</span>
+    </div>
+
+    <!-- CONFETTI CELEBRATION CANVAS -->
+    <canvas id="confetti" class="fixed inset-0 pointer-events-none z-50 w-full h-full hidden"></canvas>
+
+    <!-- FOOTER -->
+    <footer class="text-center text-xs text-slate-400 py-4 border-t border-slate-200/50 bg-white/50 w-full">
+        <p>© 2026 Masterclass Kuis PLSV Transisi Kelas 5. Didukung oleh KaTeX Engine.</p>
+    </footer>
+
+    <!-- MAIN APP JAVASCRIPT SYSTEM -->
+    <script>
+        // --- 1. AUDIO SYNTHESIZER ---
+        let audioCtx;
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); 
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08); 
+                    osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.16); 
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.4);
+                } else if (type === 'incorrect') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(220, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.08);
+                    gain.gain.setValueAtTime(0.03, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.08);
+                } else if (type === 'level-up') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(261.63, ctx.currentTime);
+                    osc.frequency.setValueAtTime(329.63, ctx.currentTime + 0.1);
+                    osc.frequency.setValueAtTime(392.00, ctx.currentTime + 0.2);
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.6);
+                }
+            } catch (e) {
+                console.log("Audio contexts blocked.");
+            }
+        }
+
+        // --- 2. 15 ALGEBRA QUESTIONS DATABASE (All Option Formulas Wrapped in KaTeX) ---
+        const questionDatabase = [
+            {
+                title: "Soal Cerita: Pola Pohon Cemara (T-Chart)",
+                question: "Sebuah pola tumbuh pohon cemara mengikuti rumus: $y = 4x + 2$ (dengan $x$ adalah tahap pemupukan dan $y$ adalah tinggi akhir dalam cm). Berapakah tinggi pohon cemara tersebut pada tahap pemupukan ke-6?",
+                options: ["$26\\text{ cm}$", "$24\\text{ cm}$", "$28\\text{ cm}$", "$20\\text{ cm}$"],
+                correct: "$26\\text{ cm}$",
+                explanation: "Masukkan nilai $x = 6$ ke dalam rumus:<br>$$y = 4(6) + 2$$<br>$$y = 24 + 2 = 26\\text{ cm}$$."
+            },
+            {
+                title: "Persamaan Langsung: Satu Langkah",
+                question: "Selesaikan persamaan satu langkah berikut untuk menemukan nilai $x$:<br><strong class='text-blue-600 text-lg font-mono'>$$x - 18 = 42$$</strong>",
+                options: ["$x = 60$", "$x = 54$", "$x = 24$", "$x = 30$"],
+                correct: "$x = 60$",
+                explanation: "Pindahkan konstanta $-18$ ke ruas kanan dengan operasi kebalikannya (penjumlahan):<br>$$x = 42 + 18$$<br>$$x = 60$$."
+            },
+            {
+                title: "Persamaan Langsung: Dua Langkah",
+                question: "Selesaikan persamaan dua langkah di bawah ini untuk mencari nilai $y$:<br><strong class='text-blue-600 text-lg font-mono'>$$3y + 7 = 34$$</strong>",
+                options: ["$y = 9$", "$y = 7$", "$y = 11$", "$y = 8$"],
+                correct: "$y = 9$",
+                explanation: "<strong>Langkah 1:</strong> Kurangi kedua ruas dengan $7$:<br>$$3y = 34 - 7 \\implies 3y = 27$$<br><strong>Langkah 2:</strong> Bagi kedua ruas dengan $3$:<br>$$y = \\frac{27}{3} \\implies y = 9$$."
+            },
+            {
+                title: "Soal Cerita: Boneka Rina (Translasi Aljabar)",
+                question: "Susi memiliki $b$ buah boneka. Rina memiliki boneka sebanyak setengah dari jumlah boneka Susi kemudian dikurangi $2$. Bentuk aljabar yang tepat untuk menyatakan jumlah boneka Rina adalah...",
+                options: ["$\\frac{b}{2} - 2$", "$2b - 2$", "$\\frac{b - 2}{2}$", "$b - 2$"],
+                correct: "$\\frac{b}{2} - 2$",
+                explanation: "Setengah dari boneka Susi ($b$) ditulis sebagai $\\frac{b}{2}$ atau $\\frac{1}{2}b$.<br>Dikurangi 2 berarti dikurang $- 2$.<br>Bentuk aljabarnya adalah: $$\\frac{b}{2} - 2$$."
+            },
+            {
+                title: "Penyelidikan Pola: Tabel T",
+                question: "Temukan pola hubungan input ($x$) dan output ($y$) dari Tabel T berikut:<br>• $x = 1 \\rightarrow y = 5$<br>• $x = 2 \\rightarrow y = 9$<br>• $x = 3 \\rightarrow y = 13$<br>Rumus persamaan yang paling tepat adalah...",
+                options: ["$y = 4x + 1$", "$y = 5x$", "$y = 3x + 2$", "$y = 2x + 3$"],
+                correct: "$y = 4x + 1$",
+                explanation: "Mari kita uji rumus $y = 4x + 1$:<br>• Untuk $x = 1 \\implies 4(1) + 1 = 5$ (Benar)<br>• Untuk $x = 2 \\implies 4(2) + 1 = 9$ (Benar)<br>• Untuk $x = 3 \\implies 4(3) + 1 = 13$ (Benar)."
+            },
+            {
+                title: "Soal Cerita: Belanja Buku Dimas",
+                question: "Dimas membeli $4$ buah buku tulis dengan harga masing-masing $b$ rupiah dan sebuah pensil seharga Rp3.000,00. Jika total belanjaan Dimas adalah Rp15.000,00, manakah model persamaan aljabar yang tepat?",
+                options: ["$4b + 3000 = 15000$", "$b + 3000 = 15000$", "$4(b + 3000) = 15000$", "$4b - 3000 = 15000$"],
+                correct: "$4b + 3000 = 15000$",
+                explanation: "Harga $4$ buku tulis adalah $4 \\times b = 4b$.<br>Harga satu pensil adalah Rp3.000,00.<br>Total belanja adalah jumlah keduanya:<br>$$4b + 3.000 = 15.000$$."
+            },
+            {
+                title: "Persamaan Langsung: Pembagian Dua Langkah",
+                question: "Tentukan nilai variabel $a$ dari persamaan berikut:<br><strong class='text-blue-600 text-lg font-mono'>$$\\frac{a}{5} + 6 = 14$$</strong>",
+                options: ["$a = 40$", "$a = 25$", "$a = 10$", "$a = 35$"],
+                correct: "$a = 40$",
+                explanation: "<strong>Langkah 1:</strong> Kurangi kedua ruas dengan $6$:<br>$$\\frac{a}{5} = 14 - 6 \\implies \\frac{a}{5} = 8$$<br><strong>Langkah 2:</strong> Kalikan kedua ruas dengan $5$:<br>$$a = 8 \\times 5 \\implies a = 40$$."
+            },
+            {
+                title: "Soal Cerita: Kelinci di Kandang",
+                question: "Jumlah kelinci di kandang ($k$) berkurang $6$ ekor karena dijual ke peternak lain, sehingga menyisakan $15$ ekor kelinci. Berapakah model persamaan dan jumlah awal kelinci di kandang tersebut?",
+                options: ["$k - 6 = 15$; awal $21$ kelinci", "$k + 6 = 15$; awal $9$ kelinci", "$6k = 15$; awal $2.5$ kelinci", "$k - 15 = 6$; awal $9$ kelinci"],
+                correct: "$k - 6 = 15$; awal $21$ kelinci",
+                explanation: "Jumlah awal ($k$) berkurang $6$ ekor dapat ditulis $k - 6$.<br>Sisa kelinci adalah $15$ ekor, sehingga persamaannya: $$k - 6 = 15$$<br>Maka jumlah kelinci awal:<br>$$k = 15 + 6 = 21\\text{ ekor}$$."
+            },
+            {
+                title: "Pola Geometri: Susunan Batang Korek Api",
+                question: "Pola susunan batang korek api membentuk barisan segitiga. Langkah ke-$n$ membutuhkan susunan sebanyak $2n + 1$ batang korek api. Berapa batang korek api yang diperlukan untuk membuat langkah ke-12?",
+                options: ["$25\\text{ batang}$", "$24\\text{ batang}$", "$26\\text{ batang}$", "$23\\text{ batang}$"],
+                correct: "$25\\text{ batang}$",
+                explanation: "Substitusikan nilai $n = 12$ ke dalam rumus pola:<br>$$\\text{Banyak korek} = 2(12) + 1$$<br>$$\\text{Banyak korek} = 24 + 1 = 25\\text{ batang}$$."
+            },
+            {
+                title: "Persamaan Langsung: Dua Langkah Pengurangan",
+                question: "Temukan penyelesaian dari persamaan linear berikut ini:<br><strong class='text-blue-600 text-lg font-mono'>$$5m - 12 = 18$$</strong>",
+                options: ["$m = 6$", "$m = 5$", "$m = 10$", "$m = 8$"],
+                correct: "$m = 6$",
+                explanation: "<strong>Langkah 1:</strong> Tambahkan kedua ruas dengan $12$:<br>$$5m = 18 + 12 \\implies 5m = 30$$<br><strong>Langkah 2:</strong> Bagi kedua ruas dengan $5$:<br>$$m = \\frac{30}{5} \\implies m = 6$$."
+            },
+            {
+                title: "Soal Cerita: Perbandingan Umur Ayah & Budi",
+                question: "Umur Ayah sekarang adalah $3$ kali umur Budi ($b$). Diketahui selisih umur mereka berdua adalah $30$ tahun. Manakah persamaan yang tepat untuk membantu menghitung umur Budi?",
+                options: ["$3b - b = 30$", "$3b + b = 30$", "$b - 30 = 3b$", "$3b = 30$"],
+                correct: "$3b - b = 30$",
+                explanation: "Umur Ayah = $3b$. Umur Budi = $b$.<br>Selisih umur mereka berdua adalah $30$ tahun:<br>$$\\text{Umur Ayah} - \\text{Umur Budi} = 30$$<br>$$3b - b = 30$$."
+            },
+            {
+                title: "Persamaan Langsung: Variabel di Kedua Sisi",
+                question: "Selesaikan persamaan berikut untuk mencari nilai variabel $p$:<br><strong class='text-blue-600 text-lg font-mono'>$$6p - 5 = 2p + 11$$</strong>",
+                options: ["$p = 4$", "$p = 3$", "$p = 2$", "$p = 5$"],
+                correct: "$p = 4$",
+                explanation: "Kumpulkan suku dengan variabel $p$ ke ruas kiri dan konstanta ke ruas kanan:<br>$$6p - 2p = 11 + 5$$<br>$$4p = 16$$<br>$$p = \\frac{16}{4} \\implies p = 4$$."
+            },
+            {
+                title: "Soal Cerita: Berbagi Cokelat Manis",
+                question: "Sekotak cokelat dibagi rata kepada $4$ orang anak, dan masing-masing anak masih mendapat tambahan bonus $2$ buah cokelat dari Ibu. Jika setiap anak membawa pulang total $8$ cokelat, berapakah jumlah cokelat mula-mula ($c$) dalam kotak tersebut?",
+                options: ["$24\\text{ cokelat}$", "$16\\text{ cokelat}$", "$32\\text{ cokelat}$", "$20\\text{ cokelat}$"],
+                correct: "$24\\text{ cokelat}$",
+                explanation: "Cokelat dibagi rata kepada $4$ anak: $\\frac{c}{4}$.<br>Masing-masing mendapat tambahan $2$ cokelat: $\\frac{c}{4} + 2$.<br>Total yang didapat adalah $8$ cokelat:<br>$$\\frac{c}{4} + 2 = 8 \\implies \\frac{c}{4} = 6 \\implies c = 24\\text{ cokelat}$$."
+            },
+            {
+                title: "Persamaan Langsung: Operasi Pecahan Aljabar",
+                question: "Carilah nilai variabel $w$ yang memenuhi persamaan berikut:<br><strong class='text-blue-600 text-lg font-mono'>$$\\frac{2w}{3} = 8$$</strong>",
+                options: ["$w = 12$", "$w = 8$", "$w = 16$", "$w = 6$"],
+                correct: "$w = 12$",
+                explanation: "Kalikan kedua ruas dengan $3$ untuk membatalkan penyebut:<br>$$2w = 8 \\times 3 \\implies 2w = 24$$<br>Bagi kedua ruas dengan $2$:<br>$$w = \\frac{24}{2} \\implies w = 12$$."
+            },
+            {
+                title: "Soal Cerita: Keliling Persegi Panjang",
+                question: "Keliling sebuah bingkai foto berbentuk persegi panjang adalah $40$ cm. Jika lebarnya adalah $8$ cm dan panjangnya dinyatakan dengan $p$ cm, tentukan nilai panjang bingkai tersebut ($p$)!",
+                options: ["$p = 12\\text{ cm}$", "$p = 10\\text{ cm}$", "$p = 14\\text{ cm}$", "$p = 8\\text{ cm}$"],
+                correct: "$p = 12\\text{ cm}$",
+                explanation: "Rumus keliling persegi panjang adalah $2(p + l) = K$.<br>Substitusikan nilai lebar $8$ dan Keliling $40$:<br>$$2(p + 8) = 40$$<br>Bagi kedua ruas dengan $2$:<br>$$p + 8 = 20 \\implies p = 20 - 8 = 12\\text{ cm}$$."
+            }
+        ];
+
+        // --- 3. SYSTEM STATE ---
+        let scoreXP = 0;
+        let currentIdx = 0;
+        let correctAnswersCount = 0;
+        let activeQuestions = [];
+        let hasAnswered = false;
+
+        // Canvas Scratchpad State
+        const canvas = document.getElementById('scratch-canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        // Confetti Context State
+        const confettiCanvas = document.getElementById('confetti');
+        const confettiCtx = confettiCanvas.getContext('2d');
+        let confettiActive = false;
+        let particles = [];
+
+        // --- 4. NAVIGATION VIEW CONTROLLER ---
+        function showSection(sectionId) {
+            playSound('click');
+            // Hide all
+            document.getElementById('lobby-view').classList.add('hidden');
+            document.getElementById('quiz-view').classList.add('hidden');
+            document.getElementById('outcome-view').classList.add('hidden');
+
+            // Show current section
+            document.getElementById(`${sectionId}-view`).classList.remove('hidden');
+        }
+
+        function backToHub() {
+            showSection('lobby');
+        }
+
+        // --- 5. INITIAL ONLOAD AND RENDERING CODES ---
+        window.onload = function() {
+            setTimeout(() => {
+                triggerMathRender(document.body);
+            }, 500);
+
+            initCanvas();
+            setupTouchGestures();
+        }
+
+        function initKaTeX() {
+            triggerMathRender(document.body);
+        }
+
+        function triggerMathRender(element) {
+            if (typeof renderMathInElement !== 'undefined') {
+                try {
+                    renderMathInElement(element || document.body, {
+                        delimiters: [
+                            {left: '$$', right: '$$', display: true},
+                            {left: '$', right: '$', display: false}
+                        ],
+                        throwOnError: false
+                    });
+                } catch (e) {
+                    console.error("Math parsing failed: ", e);
+                }
+            }
+        }
+
+        // --- 6. QUIZ MANAGEMENT ENGINE ---
+        function startQuizMode() {
+            currentIdx = 0;
+            correctAnswersCount = 0;
+            activeQuestions = [...questionDatabase];
+
+            document.getElementById('lobby-view').classList.add('hidden');
+            document.getElementById('outcome-view').classList.add('hidden');
+            document.getElementById('quiz-view').classList.remove('hidden');
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            hasAnswered = false;
+            const problem = activeQuestions[currentIdx];
+
+            document.getElementById('quiz-index-indicator').innerText = `Soal ${currentIdx + 1} / ${activeQuestions.length}`;
+            
+            // Progress Bar Width
+            const progressPercent = (currentIdx / activeQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            // Render Math equations
+            document.getElementById('problem-box').innerHTML = `
+                <h3 class="kids-heading text-lg font-bold text-slate-800">${problem.title}</h3>
+                <p class="text-sm md:text-base text-slate-600 leading-relaxed">${problem.question}</p>
+            `;
+
+            // Options grid shuffle
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+
+            const shuffledOpts = shuffleArray(problem.options);
+            shuffledOpts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-4 bg-[#F8F9FA] hover:bg-slate-100 border-2 border-slate-200 rounded-2xl text-xs md:text-sm font-bold text-slate-800 transition btn-bounce flex justify-between items-center q-option-btn";
+                btn.innerHTML = `<span>${opt}</span><span class="opacity-50 text-[10px]">PILIH ➔</span>`;
+                btn.onclick = () => verifyUserResponse(btn, opt, problem.correct, problem.explanation);
+                grid.appendChild(btn);
+            });
+
+            // Reset navigation footer styles
+            document.getElementById('explanation-box').classList.add('hidden');
+            const nextBtn = document.getElementById('next-question-btn');
+            nextBtn.innerText = "Lewati / Lanjut ▶";
+            nextBtn.className = "bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white font-extrabold px-6 py-2.5 rounded-xl text-xs md:text-sm shadow-md transition flex items-center gap-1 cursor-pointer";
+
+            triggerMathRender(document.getElementById('quiz-view'));
+        }
+
+        function verifyUserResponse(element, chosen, correct, explanation) {
+            if (hasAnswered) return;
+            hasAnswered = true;
+
+            const isCorrect = chosen === correct;
+
+            // Highlight matching choices
+            const buttons = document.querySelectorAll('.q-option-btn');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-40');
+            });
+
+            element.classList.remove('opacity-40');
+            if (isCorrect) {
+                element.className = "w-full p-4 border-2 border-emerald-500 bg-emerald-100 text-emerald-800 rounded-2xl text-xs md:text-sm font-bold flex justify-between items-center";
+                element.innerHTML = `<span>${chosen}</span> <span class="bg-emerald-500 text-white px-2.5 py-1 rounded-lg text-[9px] font-extrabold">✓ BENAR! (+15 XP)</span>`;
+                playSound('correct');
+                scoreXP += 15;
+                correctAnswersCount++;
+                document.getElementById('xp-display').innerText = `${scoreXP} XP`;
+                triggerConfetti();
+                showToast("✨ Sempurna! Kamu hebat!", "bg-emerald-500");
+            } else {
+                element.className = "w-full p-4 border-2 border-rose-500 bg-rose-100 text-rose-800 rounded-2xl text-xs md:text-sm font-bold flex justify-between items-center";
+                element.innerHTML = `<span>${chosen}</span> <span class="bg-rose-500 text-white px-2.5 py-1 rounded-lg text-[9px] font-extrabold">✕ SALAH</span>`;
+                playSound('incorrect');
+                showToast("💡 Jangan berkecil hati, ayo pelajari caranya!", "bg-rose-500");
+            }
+
+            // Reveal explanation panel
+            const explanationBox = document.getElementById('explanation-box');
+            explanationBox.className = `mt-6 p-4 rounded-2xl text-xs md:text-sm leading-relaxed border-2 ${isCorrect ? 'border-emerald-200 bg-emerald-50 text-emerald-950' : 'border-rose-200 bg-rose-50 text-rose-950'} animate-fade-in`;
+            explanationBox.innerHTML = `
+                <div class="font-extrabold text-sm mb-1">📖 Pembahasan Aljabar:</div>
+                <div>${explanation}</div>
+            `;
+            explanationBox.classList.remove('hidden');
+
+            // Change next button status
+            const nextBtn = document.getElementById('next-question-btn');
+            nextBtn.innerText = "Soal Berikutnya ▶";
+            nextBtn.className = "bg-gradient-to-r from-[#4CC9F0] to-[#4895EF] text-white hover:scale-105 font-extrabold px-6 py-2.5 rounded-xl text-xs md:text-sm shadow-md transition flex items-center gap-1 cursor-pointer";
+
+            triggerMathRender(explanationBox);
+            triggerMathRender(element);
+        }
+
+        function nextQuestion() {
+            playSound('click');
+            currentIdx++;
+            if (currentIdx < activeQuestions.length) {
+                loadQuestion();
+            } else {
+                showFinalResults();
+            }
+        }
+
+        function showFinalResults() {
+            document.getElementById('quiz-view').classList.add('hidden');
+            document.getElementById('outcome-view').classList.remove('hidden');
+
+            const accuracy = Math.round((correctAnswersCount / activeQuestions.length) * 100);
+            document.getElementById('outcome-xp').innerText = `+${correctAnswersCount * 15} XP`;
+            document.getElementById('outcome-accuracy').innerText = `${accuracy}%`;
+
+            const title = document.getElementById('outcome-title');
+            const subtitle = document.getElementById('outcome-subtitle');
+            const emoji = document.getElementById('outcome-emoji');
+
+            if (accuracy === 100) {
+                emoji.innerText = "👑⭐";
+                title.innerText = "Grandmaster Aljabar Kelas 5!";
+                subtitle.innerText = "Luar biasa! Pemahaman konsep pola dan timbanganmu siap tempur untuk tantangan kelas berikutnya.";
+                triggerConfetti();
+            } else if (accuracy >= 70) {
+                emoji.innerText = "😎🏆";
+                title.innerText = "Sangat Membanggakan!";
+                subtitle.innerText = "Kamu berhasil memecahkan sebagian besar sandi dan keseimbangan timbangan aljabar.";
+                triggerConfetti();
+            } else {
+                emoji.innerText = "🤔🌱";
+                title.innerText = "Ayo Semangat Belajar Lagi!";
+                subtitle.innerText = "Mari selidiki kembali petunjuk-petunjuk aljabar di kuis ini agar pemahamanmu makin kokoh.";
+            }
+        }
+
+        function restartQuiz() {
+            startQuizMode();
+        }
+
+        // --- 7. SHUFFLE ARRAY UTILITY ---
+        function shuffleArray(array) {
+            let shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // --- 8. DOODLE CANVAS SYSTEM (Scratchpad) ---
+        function toggleScratchpad() {
+            const pad = document.getElementById('scratchpad');
+            pad.classList.toggle('hidden');
+            if (!pad.classList.contains('hidden')) {
+                resizeCanvas();
+            }
+        }
+
+        function initCanvas() {
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                ctx.beginPath();
+                const r = canvas.getBoundingClientRect();
+                ctx.moveTo(e.clientX - r.left, e.clientY - r.top);
+            });
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDrawing) return;
+                const r = canvas.getBoundingClientRect();
+                ctx.lineTo(e.clientX - r.left, e.clientY - r.top);
+                ctx.stroke();
+            });
+            canvas.addEventListener('mouseup', () => isDrawing = false);
+
+            // Touch support
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isDrawing = true;
+                ctx.beginPath();
+                const t = e.touches[0];
+                const r = canvas.getBoundingClientRect();
+                ctx.moveTo(t.clientX - r.left, t.clientY - r.top);
+            });
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isDrawing) return;
+                const t = e.touches[0];
+                const r = canvas.getBoundingClientRect();
+                ctx.lineTo(t.clientX - r.left, t.clientY - r.top);
+                ctx.stroke();
+            });
+            canvas.addEventListener('touchend', () => isDrawing = false);
+        }
+
+        function resizeCanvas() {
+            const parent = canvas.parentNode;
+            canvas.width = parent.clientWidth;
+            canvas.height = parent.clientHeight;
+            ctx.lineCap = 'round';
+            ctx.lineWidth = 3.5;
+            ctx.strokeStyle = '#F72585'; 
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // --- 9. SWIPE GESTURES ---
+        let startX = 0;
+        function setupTouchGestures() {
+            const wrapper = document.getElementById('quiz-view');
+            wrapper.addEventListener('touchstart', (e) => {
+                startX = e.changedTouches[0].screenX;
+            }, false);
+
+            wrapper.addEventListener('touchend', (e) => {
+                const endX = e.changedTouches[0].screenX;
+                const threshold = 80;
+                if (startX - endX > threshold) {
+                    nextQuestion();
+                }
+            }, false);
+        }
+
+        // --- 10. TOAST NOTIFIER ---
+        function showToast(text, bgClass) {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toast-text');
+            toast.className = `fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 text-white font-black px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-2 animate-bounce ${bgClass}`;
+            toastText.innerHTML = text;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 4000);
+        }
+
+        // --- 11. CONFETTI CELEBRATION EFFECT ---
+        function triggerConfetti() {
+            confettiActive = true;
+            confettiCanvas.classList.remove('hidden');
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+            
+            particles = [];
+            for (let i = 0; i < 70; i++) {
+                particles.push({
+                    x: Math.random() * confettiCanvas.width,
+                    y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+                    r: Math.random() * 5 + 4,
+                    d: Math.random() * confettiCanvas.height,
+                    color: `hsl(${Math.random() * 360}, 100%, 70%)`,
+                    tilt: Math.random() * 10 - 5,
+                    tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+                    tiltAngle: 0
+                });
+            }
+
+            animateConfetti();
+            setTimeout(() => {
+                confettiActive = false;
+                confettiCanvas.classList.add('hidden');
+            }, 2500);
+        }
+
+        function animateConfetti() {
+            if (!confettiActive) return;
+            confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            
+            particles.forEach((p, idx) => {
+                p.tiltAngle += p.tiltAngleIncremental;
+                p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+                p.x += Math.sin(p.tiltAngle);
+                p.tilt = Math.sin(p.tiltAngle - idx / 3) * 15;
+
+                confettiCtx.beginPath();
+                confettiCtx.lineWidth = p.r;
+                confettiCtx.strokeStyle = p.color;
+                confettiCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                confettiCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                confettiCtx.stroke();
+            });
+
+            requestAnimationFrame(animateConfetti);
+        }
+    </script>
+</body>
+</html>
